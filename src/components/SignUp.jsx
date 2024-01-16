@@ -53,6 +53,7 @@ const SignUp = () => {
         }));
       }
     }
+    //gyguygyugfyt
     if (name === "name") {
       if (!value) {
         setError((oldError) => ({ ...oldError, nameError: "Write your name" }));
