@@ -15,7 +15,8 @@ export default function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<SignIn />} />
         {/* Redirect from / to /signup */}
-        <Route path="/" element={<Navigate to="/signup" />} />
+        <Route path="/" element={<Navigate to="/login" />} />
+        {/* <Route path="*" element={<SignIn />} /> */}
       </Route>
     )
   );

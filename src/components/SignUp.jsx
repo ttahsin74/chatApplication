@@ -6,12 +6,17 @@ import Container from "./layout/Container";
 import Input from "./Input";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import { ProgressBar } from "react-loader-spinner";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const SignUp = () => {
+  const navigate = useNavigate();
   const [eye, seteye] = useState();
-  const [progressBer, setProgressBer] = useState();
+  const [progressBer, setProgressBer] = useState(false);
   const [passwordType, setPasswordTyp] = useState();
   const [input, setInput] = useState({ email: "", name: "", password: "" });
   const [error, setError] = useState({
@@ -53,7 +58,6 @@ const SignUp = () => {
         }));
       }
     }
-    //gyguygyugfyt
     if (name === "name") {
       if (!value) {
         setError((oldError) => ({ ...oldError, nameError: "Write your name" }));
@@ -87,6 +91,7 @@ const SignUp = () => {
       ...oldTouched,
       [name]: true,
     }));
+    // console.log(touched);
   };
   const signInHandle = (e) => {
     e.preventDefault();
@@ -140,23 +145,60 @@ const SignUp = () => {
     });
 
     if (!error.emailError && !error.nameError && !error.passwordError) {
-      const auth = getAuth();
       setProgressBer(true);
-      createUserWithEmailAndPassword(auth, input.email, input.password).then(
-        (userCredential) => {
-          toast.success("successfull complete account", {
-            position: "top-center",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
+      const auth = getAuth();
+      createUserWithEmailAndPassword(auth, input.email, input.password)
+        .then((userCredential) => {
+          sendEmailVerification(auth.currentUser).then(() => {
+            toast.success("successfull complete account", {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
+            setProgressBer(false);
+            toast.info("Check your email,and varify email", {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
+            setTimeout(() => {
+              navigate("/");
+            }, 2000);
+            setProgressBer(false);
           });
-          setProgressBer(false);
-        }
-      );
+        })
+        .catch((error) => {
+          if (error.code === "auth/email-already-in-use") {
+            setError((oldError) => ({
+              ...oldError,
+              emailError: "Duplicate Email",
+            }));
+            toast.error(
+              "Use duplicate Email,Please try again with a different email",
+              {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+              }
+            );
+            setProgressBer(false);
+          }
+        });
     }
   };
 

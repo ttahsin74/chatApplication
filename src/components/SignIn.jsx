@@ -11,11 +11,57 @@ import { FaEyeSlash, FaEye } from "react-icons/fa";
 import SignInImg from "../assets/sign-in.png";
 
 const SignIn = () => {
+  const [input, setInput] = useState({ email: "", password: "" });
   const [eye, seteye] = useState();
   const [passwordType, setPasswordTyp] = useState();
+  const [error, seterror] = useState({
+    emailError: "",
+  });
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+  });
   const eyeHandle = () => {
     seteye(!eye);
     setPasswordTyp(!passwordType);
+  };
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    setInput((oldValue) => ({
+      ...oldValue,
+      [name]: value,
+    }));
+    // console.log(input.email);
+    if (name === "email") {
+      let emailVal =
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (!value.match(emailVal)) {
+        seterror((oldError) => ({
+          ...oldError,
+          emailError: "Not valid email",
+        }));
+      } else {
+        seterror((oldError) => ({
+          ...oldError,
+          emailError: "",
+        }));
+      }
+    }
+  };
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched((oldTouched) => ({
+      ...oldTouched,
+      [name]: true,
+    }));
+    // console.log(touched.email);
+  };
+  const clickButton = (e) => {
+    e.preventDefault();
+    setTouched({
+      email: true,
+      password: true,
+    });
   };
 
   return (
@@ -34,19 +80,27 @@ const SignIn = () => {
             </div>
             <form action="">
               <Input
+                value={input.email}
                 type={"email"}
                 labelName={"Email Address"}
-                // name="email"
+                name="email"
+                onChange={handleInput}
+                onBlur={handleBlur}
               />
+              {touched.email && error.emailError && (
+                <p className="text-red-500 text-[14px]">{error.emailError}</p>
+              )}
 
               <div className="relative mt-[40px] inline-block">
                 <label className="text-[13px] text-[#11175D] font-semibold absolute bg-[#fff] px-[20px] top-[-10px] left-[35px]">
                   Password
                 </label>
                 <input
+                  value={input.password}
                   type={passwordType ? "text" : "password"}
                   className=" rounded-[10px] border-2 border-[#11175D] w-[360px] px-[10px] py-[10px] "
                   name="password"
+                  onChange={handleInput}
                 />
 
                 <div
@@ -60,10 +114,13 @@ const SignIn = () => {
                   )}
                 </div>
               </div>
+              <button
+                onClick={clickButton}
+                className="rounded-[80px] px-[140px] py-[15px] bg-[#5F35F5] mt-[40px] text-5 font-semibold text-[#fff]"
+              >
+                Sign In
+              </button>
             </form>
-            <button className="rounded-[80px] px-[140px] py-[15px] bg-[#5F35F5] mt-[40px] text-5 font-semibold text-[#fff]">
-              Sign In
-            </button>
             <Link
               to="/signup"
               className="cursor-pointer block ml-[50px] mt-[35px] font-normal text-[14px] text-[#03014C]"
