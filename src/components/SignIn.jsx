@@ -9,13 +9,16 @@ import { Link } from "react-router-dom";
 
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import SignInImg from "../assets/sign-in.png";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
+import { ToastContainer, toast } from "react-toastify";
 
 const SignIn = () => {
   const [input, setInput] = useState({ email: "", password: "" });
   const [eye, seteye] = useState();
   const [passwordType, setPasswordTyp] = useState();
-  const [error, seterror] = useState({
-    emailError: "",
+  const [error, setError] = useState({
+    emailError: "Email is required",
   });
   const [touched, setTouched] = useState({
     email: false,
@@ -36,12 +39,12 @@ const SignIn = () => {
       let emailVal =
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       if (!value.match(emailVal)) {
-        seterror((oldError) => ({
+        setError((oldError) => ({
           ...oldError,
           emailError: "Not valid email",
         }));
       } else {
-        seterror((oldError) => ({
+        setError((oldError) => ({
           ...oldError,
           emailError: "",
         }));
@@ -62,6 +65,64 @@ const SignIn = () => {
       email: true,
       password: true,
     });
+    let emailVal =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    if (!input.email) {
+      setError((oldError) => ({ ...oldError, emailError: "Write your Email" }));
+    } else if (!input.email.match(emailVal)) {
+      setError((oldError) => ({
+        ...oldError,
+        emailError: "This is not a valid Email",
+      }));
+    } else {
+      setError((oldError) => ({
+        ...oldError,
+        emailError: "",
+      }));
+    }
+    if (!error.emailError && input.password) {
+      const auth = getAuth();
+      signInWithEmailAndPassword(auth, input.email, input.password).then(
+        (userCredential) => {
+
+          console.log("logedd in");
+          toast.success("successfull complete account", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          })
+          setTimeout(() => {
+            
+          }, 2000);
+        }
+        
+      )
+      .catch((error) => {
+        const errorCode = error.code;
+        if (error.code === "auth/invalid-credential") {
+          setError((oldError) => ({
+            ...oldError,
+            emailError: "Invalid Email address or Password",
+          }));
+          toast.error("Invalid Email address or Password", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        }
+      });
+    }
   };
 
   return (
@@ -131,6 +192,7 @@ const SignIn = () => {
           </div>
           <Image imgClassName="h-[110vh]" src={SignInImg} />
         </Flex>
+        <ToastContainer />
       </Container>
     </section>
   );
